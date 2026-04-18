@@ -1,0 +1,15 @@
+# Controlled topic vocabulary. Copy to topics.yaml and add your own.
+# Unrecognized topics from the LLM are kept as free-form (no mapping) and
+# surfaced in the dashboard so you can decide whether to canonicalize them.
+#
+# Format: canonical-slug: [aliases the LLM might output]
+#
+# Example (commented out so the starter file is truly empty):
+#
+# topics:
+#   ai-mem:
+#     aliases: ["ai memory", "conversation archive", "obsidian sync"]
+#   obsidian:
+#     aliases: ["pkm", "zettelkasten"]
+
+topics: {}

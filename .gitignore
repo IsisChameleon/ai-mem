@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Secrets / local config
+config.yaml
+topics.yaml
+secrets/
+.env
+token.json
+credentials.json
+*.oauth.json
+
+# Sync state (lives next to the vault, not in repo)
+.sync-state.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Raw exports should never be committed
+exports/
+*.zip

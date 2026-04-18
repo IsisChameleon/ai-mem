@@ -1,0 +1,48 @@
+# Copy to config.yaml and fill in. config.yaml is gitignored.
+
+paths:
+  # Obsidian vault root (the Dropbox-synced folder Obsidian opens as a vault).
+  vault: "~/Dropbox/Obsidian/MyVault"
+
+  # Subfolder inside the vault where chat notes go. Per-platform subdirs are created automatically.
+  notes_subdir: "AI Chats"
+
+  # Where raw export ZIPs are archived outside the vault.
+  raw_archive: "~/ai-archive/raw"
+
+  # Where chats that failed to parse are dumped for inspection.
+  failed: "~/ai-archive/failed"
+
+  # Sync state file. Lives outside the vault so Obsidian never touches it.
+  sync_state: "~/ai-archive/.sync-state.json"
+
+  # Topic vocabulary.
+  topics: "./topics.yaml"
+
+attachments:
+  # Skip any single attachment larger than this; only metadata is recorded.
+  max_bytes: 52428800  # 50 MB
+
+gmail:
+  # OAuth client secrets (downloaded from Google Cloud Console).
+  credentials: "~/.config/ai-mem/credentials.json"
+  # OAuth token cache (created on first run).
+  token: "~/.config/ai-mem/token.json"
+  # Scope is read-only; we track processed exports in sync state by message-id.
+  scope: "https://www.googleapis.com/auth/gmail.readonly"
+  # Gmail query used to find export-ready emails. Tune labels/senders to your inbox.
+  query: 'from:(noreply@anthropic.com OR noreply@openai.com) subject:(export OR "data export")'
+
+llm:
+  provider: "anthropic"
+  # Claude Haiku 4.5 — cheap, fast, good enough for 3-sentence summary + 3-5 topics.
+  model: "claude-haiku-4-5-20251001"
+  # API key read from this env var at runtime. Don't put the key here.
+  api_key_env: "ANTHROPIC_API_KEY"
+  # Max tokens for the summary call.
+  max_tokens: 400
+
+logging:
+  level: "INFO"
+  # If true, emit one JSON line per chat processed. Otherwise human-readable.
+  json: false
