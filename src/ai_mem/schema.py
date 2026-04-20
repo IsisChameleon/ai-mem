@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Platform = Literal["claude", "chatgpt"]
 Role = Literal["user", "assistant", "system", "tool"]
-ContentKind = Literal["text", "code", "image_ref", "tool_call", "tool_result", "artifact_ref"]
+ContentKind = Literal["text", "code", "image_ref", "tool_call", "tool_result", "artifact_ref", "thinking"]
 AttachmentKind = Literal["user_upload", "generated", "image"]
 ChatStatus = Literal["active", "stale", "resolved"]
 
@@ -37,6 +37,7 @@ class Attachment(_Model):
     uploaded_at: datetime | None = None
     sha256: str
     skipped_reason: str | None = None
+    extracted_content: str | None = None
 
 
 class Artifact(_Model):

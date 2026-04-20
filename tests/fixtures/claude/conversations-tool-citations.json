@@ -1,0 +1,339 @@
+[
+  {
+    "uuid": "a1211ff5-7347-4909-abe8-a946e1070552",
+    "name": "Fixture — tool_use + citations",
+    "summary": "",
+    "created_at": "2026-04-16T14:44:55.495648Z",
+    "updated_at": "2026-04-16T14:45:10.792681Z",
+    "account": {
+      "uuid": "00000000-0000-4000-8000-aaaaaaaaaaaa"
+    },
+    "chat_messages": [
+      {
+        "uuid": "019d96c0-8dfe-7caf-a1d8-db31ad6b6f49",
+        "text": "[redacted msg=0]",
+        "content": [
+          {
+            "start_timestamp": "2026-04-16T14:44:55.849259Z",
+            "stop_timestamp": "2026-04-16T14:44:55.849259Z",
+            "flags": null,
+            "type": "text",
+            "text": "[redacted text msg=0 blk=0]",
+            "citations": []
+          }
+        ],
+        "sender": "human",
+        "created_at": "2026-04-16T14:44:55.883150Z",
+        "updated_at": "2026-04-16T14:44:55.883150Z",
+        "attachments": [],
+        "files": [],
+        "parent_message_uuid": "00000000-0000-4000-8000-000000000000"
+      },
+      {
+        "uuid": "019d96c0-8dfe-7768-a5e5-602ff6e02d76",
+        "text": "[redacted msg=1]",
+        "content": [
+          {
+            "start_timestamp": "2026-04-16T14:44:57.140935Z",
+            "stop_timestamp": "2026-04-16T14:44:57.140935Z",
+            "flags": null,
+            "type": "text",
+            "text": "[redacted text msg=1 blk=0]",
+            "citations": []
+          },
+          {
+            "start_timestamp": "2026-04-16T14:44:57.539845Z",
+            "stop_timestamp": "2026-04-16T14:44:57.932949Z",
+            "flags": null,
+            "type": "thinking",
+            "thinking": "[redacted thinking msg=1 blk=1]",
+            "summaries": [
+              {
+                "summary": "redacted summary"
+              }
+            ],
+            "cut_off": false,
+            "truncated": false,
+            "alternative_display_type": null,
+            "signature": "redacted-signature"
+          },
+          {
+            "start_timestamp": "2026-04-16T14:44:58.435965Z",
+            "stop_timestamp": "2026-04-16T14:44:58.813258Z",
+            "flags": null,
+            "type": "tool_use",
+            "id": "toolu_01KiQZzAVQX9BNcpJvWSsgjS",
+            "name": "web_search",
+            "input": {
+              "query": "redacted"
+            },
+            "message": "redacted",
+            "integration_name": null,
+            "integration_icon_url": null,
+            "icon_name": "globe",
+            "context": null,
+            "display_content": null,
+            "approval_options": null,
+            "approval_key": null,
+            "is_mcp_app": null,
+            "mcp_server_url": null
+          },
+          {
+            "start_timestamp": null,
+            "stop_timestamp": null,
+            "flags": null,
+            "type": "tool_result",
+            "tool_use_id": "toolu_01KiQZzAVQX9BNcpJvWSsgjS",
+            "name": "web_search",
+            "content": [
+              {
+                "type": "knowledge",
+                "title": "Vercel v0 – From Snippets to Sync: Choosing the Right v0 Workflow",
+                "url": "https://hachweb.wordpress.com/2025/08/20/vercel-v0-from-snippets-to-sync-choosing-the-right-v0-workflow/",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "wordpress.com",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=wordpress.com",
+                  "site_name": "Wordpress"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://hachweb.wordpress.com/2025/08/20/vercel-v0-from-snippets-to-sync-choosing-the-right-v0-workflow/",
+                  "search_provider": "anthropic",
+                  "age": "August 21, 2025"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "Deploying Git Repositories with Vercel",
+                "url": "https://vercel.com/docs/git",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "vercel.com",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=vercel.com",
+                  "site_name": "Vercel"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://vercel.com/docs/git",
+                  "search_provider": "anthropic",
+                  "age": "March 12, 2026"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "--- title: Environments product: vercel url: /docs/deployments/environments",
+                "url": "https://vercel.com/docs/deployments/environments",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "vercel.com",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=vercel.com",
+                  "site_name": "Vercel"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://vercel.com/docs/deployments/environments",
+                  "search_provider": "anthropic",
+                  "age": "February 27, 2026"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "Deploying GitHub Projects with Vercel",
+                "url": "https://vercel.com/docs/git/vercel-for-github",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "vercel.com",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=vercel.com",
+                  "site_name": "Vercel"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://vercel.com/docs/git/vercel-for-github",
+                  "search_provider": "anthropic",
+                  "age": "1 month ago"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "How can I use GitHub Actions with Vercel? | Vercel Knowledge Base",
+                "url": "https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "vercel.com",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=vercel.com",
+                  "site_name": "Vercel"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://vercel.com/kb/guide/how-can-i-use-github-actions-with-vercel",
+                  "search_provider": "anthropic",
+                  "age": "November 10, 2025"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "GitHub | v0 Docs",
+                "url": "https://v0.app/docs/github",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "v0.app",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=v0.app",
+                  "site_name": "Lucide Icons"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://v0.app/docs/github",
+                  "search_provider": "anthropic"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "FAQs | v0 Docs",
+                "url": "https://v0.app/docs/faqs",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "v0.app",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=v0.app",
+                  "site_name": "Lucide Icons"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://v0.app/docs/faqs",
+                  "search_provider": "anthropic",
+                  "age": "February 4, 2026"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "github.com",
+                "url": "https://github.com/meilisearch/demos/issues/43",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "github.com",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=github.com",
+                  "site_name": "github"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://github.com/meilisearch/demos/issues/43",
+                  "search_provider": "anthropic"
+                }
+              },
+              {
+                "type": "knowledge",
+                "title": "1. Packages",
+                "url": "https://www.pulumi.com/registry/packages/vercel/api-docs/project",
+                "metadata": {
+                  "type": "webpage_metadata",
+                  "site_domain": "pulumi.com",
+                  "favicon_url": "https://www.google.com/s2/favicons?sz=64&domain=pulumi.com",
+                  "site_name": "pulumi"
+                },
+                "is_missing": false,
+                "text": "[redacted tool_result msg=1 blk=3]",
+                "is_citable": true,
+                "prompt_context_metadata": {
+                  "url": "https://www.pulumi.com/registry/packages/vercel/api-docs/project",
+                  "search_provider": "anthropic"
+                }
+              }
+            ],
+            "is_error": false,
+            "structured_content": null,
+            "meta": null,
+            "message": null,
+            "integration_name": null,
+            "mcp_server_url": null,
+            "integration_icon_url": null,
+            "icon_name": "globe",
+            "display_content": null
+          },
+          {
+            "start_timestamp": "2026-04-16T14:45:01.206454Z",
+            "stop_timestamp": "2026-04-16T14:45:01.631953Z",
+            "flags": null,
+            "type": "thinking",
+            "thinking": "[redacted thinking msg=1 blk=4]",
+            "summaries": [
+              {
+                "summary": "redacted summary"
+              }
+            ],
+            "cut_off": false,
+            "truncated": false,
+            "alternative_display_type": null,
+            "signature": "redacted-signature"
+          },
+          {
+            "start_timestamp": "2026-04-16T14:45:01.631953Z",
+            "stop_timestamp": "2026-04-16T14:45:10.758043Z",
+            "flags": null,
+            "type": "text",
+            "text": "[redacted text msg=1 blk=5]",
+            "citations": [
+              {
+                "uuid": "efe2209d-cc33-41bc-ac9a-44d58908090b",
+                "start_index": 308,
+                "end_index": 373,
+                "details": {
+                  "type": "web_search_citation",
+                  "url": "https://example.com/fixture"
+                }
+              },
+              {
+                "uuid": "c0317380-20bd-42e4-99a1-9d15a5b7b2a5",
+                "start_index": 442,
+                "end_index": 685,
+                "details": {
+                  "type": "web_search_citation",
+                  "url": "https://example.com/fixture"
+                }
+              },
+              {
+                "uuid": "473952ae-28f7-4cda-a457-54a7b3cadca9",
+                "start_index": 728,
+                "end_index": 982,
+                "details": {
+                  "type": "web_search_citation",
+                  "url": "https://example.com/fixture"
+                }
+              },
+              {
+                "uuid": "c2133f49-11aa-4e70-a5fe-b1f7e8fc6205",
+                "start_index": 1284,
+                "end_index": 1419,
+                "details": {
+                  "type": "web_search_citation",
+                  "url": "https://example.com/fixture"
+                }
+              }
+            ]
+          }
+        ],
+        "sender": "assistant",
+        "created_at": "2026-04-16T14:45:10.792681Z",
+        "updated_at": "2026-04-16T14:45:10.792681Z",
+        "attachments": [],
+        "files": [],
+        "parent_message_uuid": "019d96c0-8dfe-7caf-a1d8-db31ad6b6f49"
+      }
+    ]
+  }
+]
