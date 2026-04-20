@@ -8,7 +8,6 @@ conversations.json raises.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import logging
 from collections.abc import Iterator
@@ -24,7 +23,7 @@ from ai_mem.schema import (
     NormalizedMessage,
     WebCitation,
 )
-from ai_mem.util.hashing import short_id
+from ai_mem.util.hashing import sha256_str, short_id
 
 log = logging.getLogger(__name__)
 
@@ -41,9 +40,7 @@ _FILE_TYPE_TO_MIME: dict[str, str] = {
     "webp": "image/webp",
 }
 
-
-def _sha256_str(s: str) -> str:
-    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+_ROLE_MAP: dict[str, str] = {"human": "user", "assistant": "assistant"}
 
 
 def _parse_dt(s: str) -> datetime:
@@ -64,8 +61,9 @@ def _mime_from_file_type_or_name(file_type: str, file_name: str) -> str | None:
 
 
 def _attachment_id(file_name: str, file_size: int, extracted_content: str | None) -> str:
+    """Return the full hex sha256 for the attachment key."""
     key = f"{file_name}|{file_size}|{extracted_content or ''}"
-    return short_id(_sha256_str(key))
+    return sha256_str(key)
 
 
 def _build_attachment(
@@ -75,9 +73,9 @@ def _build_attachment(
     file_type: str,
     extracted_content: str | None,
 ) -> Attachment:
-    att_id = _attachment_id(file_name, file_size, extracted_content)
+    full_sha = _attachment_id(file_name, file_size, extracted_content)
+    att_id = short_id(full_sha)
     mime = _mime_from_file_type_or_name(file_type, file_name)
-    full_sha = _sha256_str(f"{file_name}|{file_size}|{extracted_content or ''}")
     fname = attachment_filename(full_sha, file_name, mime)
     vpath = attachment_relpath(chat_id, fname, _NOTES_SUBDIR)
     return Attachment(
@@ -97,13 +95,12 @@ def _parse_message(
     raw: dict,
     chat_id: str,
     chat_attachments_by_id: dict[str, Attachment],
-) -> tuple[NormalizedMessage, list[Attachment]]:
+) -> NormalizedMessage:
     """Parse a raw message dict.
 
-    Returns the NormalizedMessage and any new Attachment objects discovered
-    in this message that weren't already in chat_attachments_by_id.
+    Side-effects: populates chat_attachments_by_id with any new Attachment
+    objects discovered in this message.
     """
-    new_attachments: list[Attachment] = []
     attachment_ids: list[str] = []
     citation_ids: list[str] = []
     content_blocks: list[ContentBlock] = []
@@ -120,9 +117,10 @@ def _parse_message(
         attachment_ids.append(att.id)
         if att.id not in chat_attachments_by_id:
             chat_attachments_by_id[att.id] = att
-            new_attachments.append(att)
 
-    # -- files[] (pointer refs — may have no corresponding attachment entry) --
+    # The Claude export has a parallel files[] pointer list that may contain
+    # entries with no corresponding attachments[] content — we record them as
+    # metadata-only attachments so nothing gets silently dropped.
     for raw_file in raw.get("files", []):
         fname = raw_file.get("file_name", "")
         # files-only refs have no size/type/content info; use 0 / "" / None
@@ -135,7 +133,6 @@ def _parse_message(
         )
         if att.id not in chat_attachments_by_id:
             chat_attachments_by_id[att.id] = att
-            new_attachments.append(att)
         if att.id not in attachment_ids:
             attachment_ids.append(att.id)
 
@@ -150,7 +147,7 @@ def _parse_message(
             for cit in blk.get("citations", []):
                 url = cit.get("details", {}).get("url", "")
                 if url:
-                    cit_id = short_id(_sha256_str(url))
+                    cit_id = short_id(sha256_str(url))
                     if cit_id not in citation_ids:
                         citation_ids.append(cit_id)
 
@@ -184,11 +181,12 @@ def _parse_message(
                 raw.get("uuid", "?"),
             )
 
-    role_map = {"human": "user", "assistant": "assistant"}
     raw_role = raw.get("sender", "human")
-    role = role_map.get(raw_role, raw_role)  # type: ignore[arg-type]
+    if raw_role not in _ROLE_MAP:
+        log.warning("Unknown sender role %r in message %s — defaulting to 'user'", raw_role, raw.get("uuid", "?"))
+    role = _ROLE_MAP.get(raw_role, "user")
 
-    msg = NormalizedMessage(
+    return NormalizedMessage(
         id=raw["uuid"],
         role=role,
         created_at=_parse_dt(raw["created_at"]),
@@ -196,7 +194,6 @@ def _parse_message(
         attachment_ids=attachment_ids,
         citation_ids=citation_ids,
     )
-    return msg, new_attachments
 
 
 def _parse_conversation(raw: dict) -> NormalizedChat:
@@ -207,7 +204,7 @@ def _parse_conversation(raw: dict) -> NormalizedChat:
     messages: list[NormalizedMessage] = []
 
     for raw_msg in raw["chat_messages"]:
-        msg, _new_atts = _parse_message(raw_msg, chat_id, attachments_by_id)
+        msg = _parse_message(raw_msg, chat_id, attachments_by_id)
         messages.append(msg)
 
         # Collect citations into web_sources (keyed by url hash)
@@ -218,7 +215,7 @@ def _parse_conversation(raw: dict) -> NormalizedChat:
                 url = cit.get("details", {}).get("url", "")
                 if not url:
                     continue
-                cit_id = short_id(_sha256_str(url))
+                cit_id = short_id(sha256_str(url))
                 if cit_id not in web_sources_by_id:
                     web_sources_by_id[cit_id] = WebCitation(
                         id=cit_id,

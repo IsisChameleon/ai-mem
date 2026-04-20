@@ -35,7 +35,7 @@ def test_simple_fixture_basic(tmp_path):
     assert len(chats) == 1
     chat = chats[0]
     assert chat.id == "d1ccc65d-9f38-4f3f-a28e-eeba0bf8e4ad"
-    assert chat.title == "Fixture — simple text + thinking"
+    assert chat.title == "Fixture — simple text"
     assert len(chat.messages) == 2
     assert chat.platform == "claude"
     assert chat.has_alternate_branches is False
@@ -129,7 +129,7 @@ def test_citations_deduped(tmp_path):
     chat = list(parser.parse(export_dir))[0]
 
     # 4 citations in the fixture, all same URL -> deduped to 1
-    assert len(chat.web_sources) >= 1
+    assert len(chat.web_sources) == 1
     for ws in chat.web_sources:
         # id should be hex string of length 12
         assert len(ws.id) == 12
