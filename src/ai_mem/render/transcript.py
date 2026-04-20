@@ -19,14 +19,6 @@ def _short(id_: str) -> str:
     return id_[:6]
 
 
-def _human_size(size_bytes: int) -> str:
-    if size_bytes < 1024:
-        return f"{size_bytes} bytes"
-    if size_bytes < 1024 * 1024:
-        return f"{size_bytes // 1024} KB"
-    return f"{size_bytes / (1024 * 1024):.1f} MB"
-
-
 def _render_block(block: ContentBlock, citation_ids: list[str]) -> str:
     kind = block.kind
 
@@ -63,12 +55,12 @@ def _render_block(block: ContentBlock, citation_ids: list[str]) -> str:
 
     if kind == "image_ref":
         ref = block.ref_id or "ref"
-        path = ""
+        path = ""  # TODO(task-C): resolve vault path
         return f"[image_ref: {ref}]({path})"
 
     if kind == "artifact_ref":
         ref = block.ref_id or "ref"
-        path = ""
+        path = ""  # TODO(task-C): resolve vault path
         return f"[artifact_ref: {ref}]({path})"
 
     # Fallback — shouldn't happen with known kinds
@@ -82,15 +74,12 @@ def _render_message(msg: NormalizedMessage) -> str:
 
     parts = [f"### {emoji} {role_label}", f"_{ts}_"]
 
-    # Only the text block gets citation_ids; other blocks don't
-    # citation_ids belong to the message and are appended on text blocks
-    text_block_found = any(b.kind == "text" for b in msg.content)
-    for block in msg.content:
-        if block.kind == "text" and text_block_found:
-            rendered = _render_block(block, msg.citation_ids)
-        else:
-            rendered = _render_block(block, [])
-        parts.append(rendered)
+    # Only the last text block gets citation_ids; earlier text blocks and non-text blocks don't
+    text_indices = [i for i, b in enumerate(msg.content) if b.kind == "text"]
+    last_text_idx = text_indices[-1] if text_indices else None
+    for i, block in enumerate(msg.content):
+        cids = msg.citation_ids if i == last_text_idx else []
+        parts.append(_render_block(block, cids))
 
     return "\n\n".join(parts)
 

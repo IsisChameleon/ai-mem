@@ -15,7 +15,6 @@ has_alternate_branches: false
 branch_count: 1
 ---
 
-
 # Fixture — tool_use + citations
 
 > [!info] **Claude** · unknown model · 2026-04-16 · 2 messages · imported 2026-01-15
@@ -51,8 +50,6 @@ _2026-04-16 14:44 UTC_
 _2026-04-16 14:45 UTC_
 
 [redacted text msg=1 blk=0]
-
-*Cites:* [^c-02ff6b]
 
 <details>
 <summary>Thinking</summary>

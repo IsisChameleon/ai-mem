@@ -15,7 +15,6 @@ has_alternate_branches: false
 branch_count: 1
 ---
 
-
 # Fixture — simple text
 
 > [!info] **Claude** · unknown model · 2024-07-09 · 2 messages · imported 2026-01-15

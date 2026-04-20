@@ -184,7 +184,7 @@ def render(
     conversation = transcript.render(chat)
 
     parts = [
-        fm_block,
+        fm_block.rstrip("\n"),
         f"# {chat.title}",
         info,
         "## Summary",
