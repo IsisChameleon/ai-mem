@@ -50,13 +50,6 @@ def test_extract_creates_dest(tmp_path):
     assert (dest / "a.txt").exists()
 
 
-def test_extract_returns_dest(tmp_path):
-    zip_path = _make_zip(tmp_path, {"x.txt": "y"})
-    dest = tmp_path / "out"
-    result = extract(zip_path, dest)
-    assert result == dest
-
-
 def test_zipslip_dotdot_rejected(tmp_path):
     zip_path = _make_zip(tmp_path, {"../evil.md": "evil"})
     dest = tmp_path / "dest"

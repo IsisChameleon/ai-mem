@@ -101,7 +101,7 @@ def test_simple_end_to_end(tmp_path):
     assert key in chats
     entry = chats[key]
     assert entry["content_hash"]
-    assert entry["summary_hash"]
+    assert entry["summary_hash"] == ""  # populated by enrich stage in Task D
     assert entry["note_path"]
 
 
@@ -224,6 +224,9 @@ def test_only_chat_id_filter(tmp_path):
     att_notes = list((cfg.paths.vault / "AI Chats" / "claude").glob(f"**/*{ATTACHMENT_CHAT_ID}*"))
     assert att_notes == []
 
+    # The filtered-out chat should be counted.
+    assert result.chats_filtered > 0
+
 
 # ---------------------------------------------------------------------------
 # 7. since filter
@@ -316,12 +319,13 @@ def test_zip_ingest(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# 10. ZipSlip rejected (also see test_fetch_archive.py)
+# 10. Temp directory is cleaned up even when ZipSlip raises (Critical #1)
 # ---------------------------------------------------------------------------
 
 
-def test_zip_slip_rejected(tmp_path):
-    from ai_mem.fetch.archive import extract
+def test_tempdir_cleaned_on_zipslip(tmp_path, monkeypatch):
+    """Verify that TemporaryDirectory.cleanup() is called even when extract() raises."""
+    cfg = _make_config(tmp_path)
 
     zip_path = tmp_path / "malicious.zip"
     buf = io.BytesIO()
@@ -329,6 +333,18 @@ def test_zip_slip_rejected(tmp_path):
         zf.writestr("../evil.md", "evil content")
     zip_path.write_bytes(buf.getvalue())
 
-    dest = tmp_path / "dest"
+    cleanup_called = []
+    original_cleanup = __import__("tempfile").TemporaryDirectory.cleanup
+
+    def _tracking_cleanup(self):
+        cleanup_called.append(True)
+        original_cleanup(self)
+
+    monkeypatch.setattr(
+        __import__("tempfile").TemporaryDirectory, "cleanup", _tracking_cleanup
+    )
+
     with pytest.raises(ValueError, match="ZipSlip"):
-        extract(zip_path, dest)
+        ingest(zip_path, cfg)
+
+    assert cleanup_called, "TemporaryDirectory.cleanup() was not called after ZipSlip exception"

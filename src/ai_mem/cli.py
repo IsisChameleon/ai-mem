@@ -46,16 +46,13 @@ def _parse_since(value: str | None) -> datetime | None:
     """Parse --since as YYYY-MM-DD or full ISO datetime, returning a tz-aware UTC datetime."""
     if value is None:
         return None
-    # Try full ISO first, then date-only.
-    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
-        try:
-            dt = datetime.strptime(value, fmt)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=UTC)
-            return dt
-        except ValueError:
-            continue
-    raise ValueError(f"Cannot parse --since value: {value!r}. Use YYYY-MM-DD or ISO format.")
+    try:
+        dt = datetime.fromisoformat(value)
+    except ValueError as e:
+        raise ValueError(f"Cannot parse --since value: {value!r}. Use YYYY-MM-DD or ISO format.") from e
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -83,10 +80,11 @@ def main(argv: list[str] | None = None) -> int:
         )
 
         log.info(
-            "ingest: seen=%d written=%d skipped=%d failed=%d stubs=%d",
+            "ingest: seen=%d written=%d skipped=%d filtered=%d failed=%d stubs=%d",
             result.chats_seen,
             result.chats_written,
             result.chats_skipped,
+            result.chats_filtered,
             result.chats_failed,
             result.stubs_written,
         )

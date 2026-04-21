@@ -26,6 +26,7 @@ class IngestResult:
     chats_seen: int = 0
     chats_written: int = 0
     chats_skipped: int = 0
+    chats_filtered: int = 0
     chats_failed: int = 0
     stubs_written: int = 0
     notes_paths: list[Path] = field(default_factory=list)
@@ -67,17 +68,18 @@ def ingest(
     result = IngestResult()
     _imported_at = imported_at or datetime.now(UTC)
 
-    # Handle ZIP extraction using a context manager that auto-cleans on exit.
+    # Handle ZIP extraction inside the try/finally so cleanup always runs,
+    # including when extract() raises (e.g. ZipSlip).
     tmp_dir_ctx = None
-    if export_path.is_file() and export_path.suffix.lower() == ".zip":
-        tmp_dir_ctx = tempfile.TemporaryDirectory()
-        dest = Path(tmp_dir_ctx.name)
-        extract(export_path, dest)
-        export_dir = dest
-    else:
-        export_dir = export_path
-
     try:
+        if export_path.is_file() and export_path.suffix.lower() == ".zip":
+            tmp_dir_ctx = tempfile.TemporaryDirectory()
+            dest = Path(tmp_dir_ctx.name)
+            extract(export_path, dest)
+            export_dir = dest
+        else:
+            export_dir = export_path
+
         _run_ingest(
             export_dir=export_dir,
             cfg=cfg,
@@ -112,6 +114,7 @@ def _run_ingest(
         result.chats_seen += 1
 
         if only_chat_id is not None and chat.id != only_chat_id:
+            result.chats_filtered += 1
             continue
 
         if since is not None and chat.updated_at < since:
@@ -185,7 +188,7 @@ def _process_chat(
     # Update state.
     state.chats[key] = ChatStateEntry(
         content_hash=content_hash,
-        summary_hash=content_hash,
+        summary_hash="",  # populated by enrich stage in Task D
         note_path=rendered.vault_rel_path.as_posix(),
         updated_at=chat.updated_at.isoformat(),
         rendered_at=datetime.now(UTC).isoformat(),
