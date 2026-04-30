@@ -30,6 +30,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--only", metavar="CHAT_ID", help="Process only this chat id.")
     p.add_argument("--since", metavar="ISO_DATE", help="Skip chats updated before this date.")
     p.add_argument("--prune", action="store_true", help="Remove orphaned attachments.")
+    p.add_argument(
+        "--account",
+        metavar="EMAIL",
+        help="Account email to stamp on imported notes (overrides config.yaml account).",
+    )
 
     mode = p.add_mutually_exclusive_group()
     mode.add_argument("--fetch", action="store_true", help="Pull new exports from Gmail.")
@@ -77,6 +82,7 @@ def main(argv: list[str] | None = None) -> int:
             dry_run=args.dry_run,
             only_chat_id=args.only,
             since=since,
+            account=args.account or None,
         )
 
         log.info(

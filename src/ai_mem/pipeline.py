@@ -32,10 +32,10 @@ class IngestResult:
     notes_paths: list[Path] = field(default_factory=list)
 
 
-def _detect_platform_and_parse(export_dir: Path, cfg: Config):
+def _detect_platform_and_parse(export_dir: Path, account: str | None):
     """Detect the platform from export_dir and return an iterator of NormalizedChat."""
     if (export_dir / "conversations.json").exists():
-        return ClaudeParser(account=cfg.account).parse(export_dir)
+        return ClaudeParser(account=account).parse(export_dir)
     raise ValueError(
         f"Cannot detect platform from export dir {export_dir!r}. "
         "Only Claude exports (containing conversations.json) are currently supported. "
@@ -51,6 +51,7 @@ def ingest(
     only_chat_id: str | None = None,
     since: datetime | None = None,
     imported_at: datetime | None = None,
+    account: str | None = None,
 ) -> IngestResult:
     """Run the full ingest pipeline for an export path (ZIP or directory).
 
@@ -88,6 +89,7 @@ def ingest(
             only_chat_id=only_chat_id,
             since=since,
             imported_at=_imported_at,
+            account=account if account is not None else cfg.account,
         )
     finally:
         if tmp_dir_ctx is not None:
@@ -104,11 +106,12 @@ def _run_ingest(
     only_chat_id: str | None,
     since: datetime | None,
     imported_at: datetime,
+    account: str | None,
 ) -> None:
     """Core ingest logic after extraction is resolved."""
     state = load(cfg.paths.sync_state)
 
-    chat_iter = _detect_platform_and_parse(export_dir, cfg)
+    chat_iter = _detect_platform_and_parse(export_dir, account)
 
     for chat in chat_iter:
         result.chats_seen += 1
