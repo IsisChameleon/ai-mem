@@ -3,6 +3,7 @@ from pathlib import Path
 from ai_mem.sync.state import (
     ChatStateEntry,
     EmailStateEntry,
+    LastIngestRecord,
     SyncState,
     chat_key,
     load,
@@ -56,3 +57,31 @@ def test_save_is_atomic(tmp_path: Path) -> None:
     save(SyncState(), p)
     # No leftover .tmp file
     assert not (tmp_path / ".sync-state.json.tmp").exists()
+
+
+def test_last_ingest_roundtrip(tmp_path: Path) -> None:
+    p = tmp_path / ".sync-state.json"
+    state = SyncState(
+        last_ingest=LastIngestRecord(
+            at="2026-04-30T18:45:00+00:00",
+            source_name="claude-export.zip",
+            account="me@example.com",
+            chats_seen=34,
+            chats_written=2,
+            chats_skipped=32,
+            max_chat_updated_at="2026-04-29T10:00:00+00:00",
+        ),
+    )
+    save(state, p)
+    loaded = load(p)
+    assert loaded.last_ingest is not None
+    assert loaded.last_ingest.source_name == "claude-export.zip"
+    assert loaded.last_ingest.chats_written == 2
+    assert loaded.last_ingest.max_chat_updated_at == "2026-04-29T10:00:00+00:00"
+
+
+def test_load_missing_last_ingest_returns_none(tmp_path: Path) -> None:
+    p = tmp_path / ".sync-state.json"
+    save(SyncState(), p)
+    loaded = load(p)
+    assert loaded.last_ingest is None

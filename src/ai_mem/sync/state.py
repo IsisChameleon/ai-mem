@@ -3,6 +3,15 @@
 Shape:
   {
     "version": 1,
+    "last_ingest": {
+      "at": "2026-04-30T18:45:26Z",
+      "source_name": "claude-export.zip",
+      "account": "me@example.com",
+      "chats_seen": 34,
+      "chats_written": 2,
+      "chats_skipped": 32,
+      "max_chat_updated_at": "2026-04-29T10:00:00Z"
+    },
     "chats": {
        "<platform>:<chat_id>": {
          "content_hash": "...",
@@ -42,8 +51,20 @@ class EmailStateEntry:
 
 
 @dataclass
+class LastIngestRecord:
+    at: str                   # ISO timestamp when the run started
+    source_name: str          # basename of the ZIP or export dir
+    account: str | None       # account email used
+    chats_seen: int
+    chats_written: int
+    chats_skipped: int
+    max_chat_updated_at: str  # floor for next run's auto-since filter
+
+
+@dataclass
 class SyncState:
     version: int = 1
+    last_ingest: LastIngestRecord | None = None
     chats: dict[str, ChatStateEntry] = field(default_factory=dict)
     processed_emails: dict[str, EmailStateEntry] = field(default_factory=dict)
 
@@ -52,8 +73,10 @@ def load(path: Path) -> SyncState:
     if not path.exists():
         return SyncState()
     raw = json.loads(path.read_text())
+    li_raw = raw.get("last_ingest")
     return SyncState(
         version=raw.get("version", 1),
+        last_ingest=LastIngestRecord(**li_raw) if li_raw else None,
         chats={
             k: ChatStateEntry(
                 content_hash=v["content_hash"],
@@ -77,6 +100,7 @@ def save(state: SyncState, path: Path) -> None:
         json.dumps(
             {
                 "version": state.version,
+                "last_ingest": asdict(state.last_ingest) if state.last_ingest else None,
                 "chats": {k: asdict(v) for k, v in state.chats.items()},
                 "processed_emails": {
                     k: asdict(v) for k, v in state.processed_emails.items()

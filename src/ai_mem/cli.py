@@ -28,7 +28,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--dry-run", action="store_true", help="Render but don't write to the vault.")
     p.add_argument("--only", metavar="CHAT_ID", help="Process only this chat id.")
-    p.add_argument("--since", metavar="ISO_DATE", help="Skip chats updated before this date.")
+    p.add_argument("--since", metavar="ISO_DATE", help="Skip chats updated before this date (overrides auto-since).")
+    p.add_argument("--no-since", action="store_true", help="Ignore last ingest date and process all chats (full rescan).")
     p.add_argument("--prune", action="store_true", help="Remove orphaned attachments.")
     p.add_argument(
         "--account",
@@ -83,6 +84,7 @@ def main(argv: list[str] | None = None) -> int:
             only_chat_id=args.only,
             since=since,
             account=args.account or None,
+            no_since=args.no_since,
         )
 
         log.info(

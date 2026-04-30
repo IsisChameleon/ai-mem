@@ -346,3 +346,50 @@ def test_tempdir_cleaned_on_zipslip(tmp_path, monkeypatch):
         ingest(zip_path, cfg)
 
     assert cleanup_called, "TemporaryDirectory.cleanup() was not called after ZipSlip exception"
+
+
+# ---------------------------------------------------------------------------
+# 11. last_ingest written after full run; auto-since on next run
+# ---------------------------------------------------------------------------
+
+
+def test_last_ingest_written_after_run(tmp_path):
+    cfg = _make_config(tmp_path)
+    export_dir = _write_export(tmp_path, "conversations-simple.json")
+
+    result = ingest(export_dir, cfg)
+    assert result.chats_written == 1
+
+    state_data = json.loads(cfg.paths.sync_state.read_text())
+    assert state_data["last_ingest"] is not None
+    li = state_data["last_ingest"]
+    assert li["chats_seen"] == 1
+    assert li["chats_written"] == 1
+    assert li["max_chat_updated_at"]
+    assert li["source_name"] == export_dir.name
+
+
+def test_auto_since_skips_unchanged_on_second_run(tmp_path):
+    cfg = _make_config(tmp_path)
+    export_dir = _write_export(tmp_path, "conversations-simple.json")
+
+    result1 = ingest(export_dir, cfg)
+    assert result1.chats_written == 1
+
+    # Second run: auto-since kicks in; unchanged chat filtered before hash check.
+    result2 = ingest(export_dir, cfg)
+    assert result2.chats_written == 0
+    assert result2.chats_skipped == 1
+
+
+def test_no_since_forces_full_scan(tmp_path):
+    cfg = _make_config(tmp_path)
+    export_dir = _write_export(tmp_path, "conversations-simple.json")
+
+    ingest(export_dir, cfg)
+
+    # --no-since: all chats seen again; content hash catches unchanged one.
+    result = ingest(export_dir, cfg, no_since=True)
+    assert result.chats_seen == 1
+    assert result.chats_written == 0   # hash unchanged → skipped inside _process_chat
+    assert result.chats_skipped == 1

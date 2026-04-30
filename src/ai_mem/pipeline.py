@@ -14,7 +14,7 @@ from ai_mem.fetch.archive import extract
 from ai_mem.parse.claude import ClaudeParser
 from ai_mem.render.note import render as render_note
 from ai_mem.schema import NormalizedChat
-from ai_mem.sync.state import ChatStateEntry, SyncState, chat_key, load, save
+from ai_mem.sync.state import ChatStateEntry, LastIngestRecord, SyncState, chat_key, load, save
 from ai_mem.sync.writer import write_atomic
 from ai_mem.util.hashing import canonical_json_hash
 
@@ -52,6 +52,7 @@ def ingest(
     since: datetime | None = None,
     imported_at: datetime | None = None,
     account: str | None = None,
+    no_since: bool = False,
 ) -> IngestResult:
     """Run the full ingest pipeline for an export path (ZIP or directory).
 
@@ -68,6 +69,7 @@ def ingest(
     """
     result = IngestResult()
     _imported_at = imported_at or datetime.now(UTC)
+    source_name = export_path.name  # capture before potential ZIP extraction
 
     # Handle ZIP extraction inside the try/finally so cleanup always runs,
     # including when extract() raises (e.g. ZipSlip).
@@ -90,6 +92,8 @@ def ingest(
             since=since,
             imported_at=_imported_at,
             account=account if account is not None else cfg.account,
+            source_name=source_name,
+            no_since=no_since,
         )
     finally:
         if tmp_dir_ctx is not None:
@@ -107,14 +111,33 @@ def _run_ingest(
     since: datetime | None,
     imported_at: datetime,
     account: str | None,
+    source_name: str,
+    no_since: bool,
 ) -> None:
     """Core ingest logic after extraction is resolved."""
     state = load(cfg.paths.sync_state)
 
+    # Auto-since: if no explicit --since and not suppressed, use the max
+    # chat updated_at from the last run as the filter floor.
+    if since is None and not no_since and state.last_ingest is not None:
+        since = datetime.fromisoformat(state.last_ingest.max_chat_updated_at)
+        log.info(
+            "auto-filtering to chats updated after %s (use --no-since to process all)",
+            state.last_ingest.max_chat_updated_at,
+        )
+
     chat_iter = _detect_platform_and_parse(export_dir, account)
+
+    # Track the highest updated_at seen across the whole export for the next
+    # run's auto-since floor. Updated before the since filter so it reflects
+    # the full export, not just the window processed this run.
+    max_chat_updated_at: datetime | None = None
 
     for chat in chat_iter:
         result.chats_seen += 1
+
+        if max_chat_updated_at is None or chat.updated_at > max_chat_updated_at:
+            max_chat_updated_at = chat.updated_at
 
         if only_chat_id is not None and chat.id != only_chat_id:
             result.chats_filtered += 1
@@ -144,6 +167,18 @@ def _run_ingest(
             result.chats_failed += 1
 
     if not dry_run:
+        # Record last_ingest for full runs so the next run can auto-filter.
+        # Skipped for --only targeted runs which only see a subset of chats.
+        if only_chat_id is None and max_chat_updated_at is not None:
+            state.last_ingest = LastIngestRecord(
+                at=imported_at.isoformat(),
+                source_name=source_name,
+                account=account,
+                chats_seen=result.chats_seen,
+                chats_written=result.chats_written,
+                chats_skipped=result.chats_skipped,
+                max_chat_updated_at=max_chat_updated_at.isoformat(),
+            )
         save(state, cfg.paths.sync_state)
 
 
