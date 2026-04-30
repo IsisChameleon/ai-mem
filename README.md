@@ -2,62 +2,118 @@
 
 Sync Claude.ai and ChatGPT conversation exports into an Obsidian vault.
 
-**Status:** v0.1 scaffold. Schema, config, filename, and frontmatter modules are implemented. Parsers, fetch, enrich, and sync stages are stubbed with `NotImplementedError` and will be filled in against a real Claude export.
+## What it does
 
-## What it does (once built)
+1. Parses Claude.ai export ZIPs into a unified schema.
+2. Renders one Markdown note per chat into your Obsidian vault under `AI Chats/<platform>/<YYYY-MM>/`.
+3. Stubs text-based attachments as separate notes under `AI Chats/attachments/<chat-id>/`.
+4. Tracks everything in `.sync-state.json` so re-running only touches changed chats.
+5. *(planned)* Watches Gmail for export-ready emails and downloads ZIPs automatically.
+6. *(planned)* ChatGPT export support.
 
-1. Watches Gmail for export-ready emails from Claude.ai and ChatGPT (read-only scope).
-2. Downloads the ZIPs, archives them at `~/ai-archive/raw/<platform>/`.
-3. Parses both platforms into a unified schema.
-4. Generates a summary and topic list per chat via Claude Haiku 4.5.
-5. Renders one Markdown note per chat into your Obsidian vault, with attachments copied under `AI Chats/attachments/<chat-id>/`.
-6. Tracks everything in `.sync-state.json` so re-running only touches changed chats.
+## Install
 
-## Layout
+```bash
+uv sync
+```
+
+## Configuration
+
+```bash
+cp config.example.yaml config.yaml
+# edit config.yaml — set vault path and account email at minimum
+```
+
+Key fields in `config.yaml`:
+
+```yaml
+account: "you@example.com"   # stamped on every note so you know which login opens the URL
+
+paths:
+  vault: "~/Documents/ai-mem"
+  notes_subdir: "AI Chats"
+  raw_archive: "~/ai-archive/raw"
+  failed: "~/ai-archive/failed"
+  sync_state: "~/Documents/ai-mem/.sync-state.json"
+```
+
+## Usage
+
+### Ingest a Claude export ZIP
+
+Download your export from claude.ai → Account → Export Data, then:
+
+```bash
+ai-mem --ingest ~/Downloads/claude-export.zip
+```
+
+Override the account email for this run (useful if you have multiple accounts):
+
+```bash
+ai-mem --ingest ~/Downloads/claude-export.zip --account personal@example.com
+```
+
+### Other flags
+
+```bash
+ai-mem --ingest <zip> --dry-run          # render but write nothing
+ai-mem --ingest <zip> --only <chat-id>   # re-process one specific chat
+ai-mem --ingest <zip> --since 2025-01-01 # skip chats not updated since this date
+ai-mem --fetch                           # (planned) pull new exports from Gmail
+```
+
+### Opening in Obsidian
+
+Point Obsidian at the vault directory:
+
+- **⌘⇧G** in the vault picker → paste `~/Documents/ai-mem` → Open
+- The `.sync-state.json` file is a dotfile and stays hidden in Obsidian by default
+
+Re-running `ai-mem --ingest <same-zip>` is a no-op — only chats whose content changed will be rewritten.
+
+## Note structure
+
+Each chat note contains:
+
+```
+---                          # frontmatter: id, title, platform, account, url, dates, message_count
+# Chat title
+> [!info] callout            # platform · model · date range · message count · import date
+
+## Sources & artifacts
+### Uploaded by me           # wikilinks to attachment stubs
+### Generated during the conversation
+### Web sources referenced   # URLs cited by the assistant
+
+## Conversation              # full transcript with role headers, timestamps, tool calls
+```
+
+Attachment stubs (text files only — images are skipped) live at:
+
+```
+AI Chats/attachments/<chat-id>/<sha-prefix>-<original-filename>.md
+```
+
+## Project layout
 
 ```
 src/ai_mem/
-  cli.py          argparse entrypoint
-  config.py       loads config.yaml
-  schema.py       NormalizedChat, NormalizedMessage, Attachment, Artifact, WebCitation
-  fetch/          Gmail OAuth + ZIP archival
-  parse/          Claude + ChatGPT parsers
-  enrich/         per-chat summary + topic normalization
-  render/         markdown rendering (filenames, frontmatter, transcript, note)
-  sync/           state, attachment copy, atomic writes
+  cli.py          argparse entrypoint (--ingest, --fetch, --dry-run, --only, --since, --account)
+  config.py       config.yaml loader
+  schema.py       NormalizedChat, NormalizedMessage, Attachment, WebCitation
+  fetch/          Gmail OAuth + ZIP archival (planned)
+  parse/          Claude parser (ChatGPT planned)
+  render/         filenames, frontmatter, transcript, note assembly
+  sync/           sync state, atomic writes
   util/           hashing, logging
-templates/        Templater meta-prompts for Query 1 and Query 2
-dashboards/       Dataview dashboard
-tests/            unit + golden-file tests; fixtures/ committed once exports are redacted
+tests/
+  fixtures/       redacted export fixtures
+  snapshots/      golden-file render outputs
 ```
 
-## Setup (planned — not wired yet)
+## Dev
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e ".[dev]"
-cp config.example.yaml config.yaml
-cp topics.example.yaml topics.yaml
-# edit config.yaml with your paths + API keys
+uv run pytest           # run all tests
+uv run pytest -q        # quiet output
 ```
-
-Then, once implemented:
-
-```bash
-ai-mem --fetch              # pull new exports from Gmail
-ai-mem --ingest <zip>       # process a specific ZIP
-ai-mem --dry-run            # print what would change, write nothing
-ai-mem --only <chat-id>     # re-process one chat
-```
-
-## Next milestones
-
-1. Drop a real Claude export ZIP at `~/ai-archive/raw/claude/` and share redacted fixtures.
-2. Implement `parse/claude.py` against real data.
-3. Implement `render/transcript.py` + `render/note.py` with golden-file tests.
-4. Implement `sync/state.py` + `sync/writer.py` with idempotency tests.
-5. Implement `fetch/gmail_client.py` (OAuth flow + download).
-6. Implement `enrich/summarize.py` (Claude Haiku 4.5).
-7. Implement `parse/chatgpt.py` (best-effort until a real ChatGPT export is available).
-8. Templates, dashboard, full README.
