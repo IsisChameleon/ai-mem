@@ -196,7 +196,7 @@ def _parse_message(
     )
 
 
-def _parse_conversation(raw: dict) -> NormalizedChat:
+def _parse_conversation(raw: dict, account: str | None = None) -> NormalizedChat:
     """Parse a single conversation dict into NormalizedChat."""
     chat_id = raw["uuid"]
     attachments_by_id: dict[str, Attachment] = {}
@@ -228,6 +228,7 @@ def _parse_conversation(raw: dict) -> NormalizedChat:
         platform="claude",
         title=raw.get("name") or "Untitled",
         model=None,
+        account=account,
         url=f"https://claude.ai/chat/{chat_id}",
         created_at=_parse_dt(raw["created_at"]),
         updated_at=_parse_dt(raw["updated_at"]),
@@ -243,6 +244,9 @@ def _parse_conversation(raw: dict) -> NormalizedChat:
 class ClaudeParser(Parser):
     platform = "claude"
 
+    def __init__(self, account: str | None = None) -> None:
+        self._account = account
+
     def parse(self, export_dir: Path) -> Iterator[NormalizedChat]:
         conversations_path = export_dir / "conversations.json"
         if not conversations_path.exists():
@@ -255,7 +259,7 @@ class ClaudeParser(Parser):
         for raw_conv in raw_list:
             conv_uuid = raw_conv.get("uuid", "<unknown>")
             try:
-                yield _parse_conversation(raw_conv)
+                yield _parse_conversation(raw_conv, account=self._account)
             except Exception:
                 log.warning(
                     "Skipping conversation %s due to parse error",

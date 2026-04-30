@@ -3,13 +3,12 @@ id: a1211ff5-7347-4909-abe8-a946e1070552
 title: Fixture — tool_use + citations
 platform: claude
 model: null
+account: null
 url: https://claude.ai/chat/a1211ff5-7347-4909-abe8-a946e1070552
 created: '2026-04-16T14:44:55Z'
 updated: '2026-04-16T14:45:10Z'
 imported: '2026-01-15T12:00:00Z'
 message_count: 2
-topics: []
-summary: ''
 status: active
 has_alternate_branches: false
 branch_count: 1
@@ -18,10 +17,6 @@ branch_count: 1
 # Fixture — tool_use + citations
 
 > [!info] **Claude** · unknown model · 2026-04-16 · 2 messages · imported 2026-01-15
-
-## Summary
-
-_(pending)_
 
 ## Sources & artifacts
 

@@ -83,16 +83,10 @@ class NormalizedChat(_Model):
     artifacts: list[Artifact] = Field(default_factory=list)
     web_sources: list[WebCitation] = Field(default_factory=list)
     raw_path: Path | None = None
-    # Populated by enrich stage.
-    summary: str | None = None
-    topics: list[str] = Field(default_factory=list)
+    account: str | None = None
     status: ChatStatus = "active"
     # ChatGPT-only: was the mapping tree branched?
     has_alternate_branches: bool = False
     branch_count: int = 1
 
 
-class SummaryResult(_Model):
-    summary: str
-    topics: list[str]
-    status_hint: ChatStatus = "active"

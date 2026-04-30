@@ -16,7 +16,6 @@ class Paths:
     raw_archive: Path
     failed: Path
     sync_state: Path
-    topics: Path
 
 
 @dataclass(frozen=True)
@@ -56,6 +55,7 @@ class Config:
     attachments: Attachments
     gmail: Gmail
     llm: LLM
+    account: str | None = None
     logging: Logging = field(default_factory=Logging)
 
 
@@ -77,7 +77,6 @@ def load(path: Path | str) -> Config:
             raw_archive=_p(p["raw_archive"]),
             failed=_p(p["failed"]),
             sync_state=_p(p["sync_state"]),
-            topics=_p(p["topics"]),
         ),
         attachments=Attachments(max_bytes=int(a.get("max_bytes", 50 * 1024 * 1024))),
         gmail=Gmail(
@@ -92,6 +91,7 @@ def load(path: Path | str) -> Config:
             api_key_env=m["api_key_env"],
             max_tokens=int(m.get("max_tokens", 400)),
         ),
+        account=data.get("account") or None,
         logging=Logging(
             level=lg.get("level", "INFO"),
             json=bool(lg.get("json", False)),

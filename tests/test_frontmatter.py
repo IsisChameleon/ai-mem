@@ -13,11 +13,10 @@ def _chat() -> NormalizedChat:
         platform="claude",
         title="Example",
         model="claude-sonnet-4-6",
+        account="test@example.com",
         url="https://claude.ai/chat/abc123",
         created_at=dt,
         updated_at=dt,
-        summary="short summary",
-        topics=["ai-mem", "obsidian"],
     )
 
 
@@ -35,7 +34,7 @@ def test_yaml_block_is_parseable() -> None:
     data = yaml.safe_load(inner)
     assert data["id"] == "abc123"
     assert data["platform"] == "claude"
-    assert data["topics"] == ["ai-mem", "obsidian"]
+    assert data["account"] == "test@example.com"
     assert data["message_count"] == 0
     assert data["created"].endswith("Z")
 

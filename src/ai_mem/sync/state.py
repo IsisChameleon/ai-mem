@@ -3,16 +3,13 @@
 Shape:
   {
     "version": 1,
-    "topics_version": "<sha256 of topics.yaml>",
     "chats": {
        "<platform>:<chat_id>": {
          "content_hash": "...",
-         "summary_hash": "...",
          "note_path": "AI Chats/claude/2025-11/2025-11-07 - slug.md",
          "updated_at": "...",
          "rendered_at": "...",
-         "attachment_ids": [...],
-         "summary_pending": false
+         "attachment_ids": [...]
        }
     },
     "processed_emails": {
@@ -31,12 +28,10 @@ from pathlib import Path
 @dataclass
 class ChatStateEntry:
     content_hash: str
-    summary_hash: str
     note_path: str
     updated_at: str
     rendered_at: str
     attachment_ids: list[str] = field(default_factory=list)
-    summary_pending: bool = False
 
 
 @dataclass
@@ -49,7 +44,6 @@ class EmailStateEntry:
 @dataclass
 class SyncState:
     version: int = 1
-    topics_version: str = ""
     chats: dict[str, ChatStateEntry] = field(default_factory=dict)
     processed_emails: dict[str, EmailStateEntry] = field(default_factory=dict)
 
@@ -60,8 +54,16 @@ def load(path: Path) -> SyncState:
     raw = json.loads(path.read_text())
     return SyncState(
         version=raw.get("version", 1),
-        topics_version=raw.get("topics_version", ""),
-        chats={k: ChatStateEntry(**v) for k, v in raw.get("chats", {}).items()},
+        chats={
+            k: ChatStateEntry(
+                content_hash=v["content_hash"],
+                note_path=v["note_path"],
+                updated_at=v["updated_at"],
+                rendered_at=v["rendered_at"],
+                attachment_ids=v.get("attachment_ids", []),
+            )
+            for k, v in raw.get("chats", {}).items()
+        },
         processed_emails={
             k: EmailStateEntry(**v) for k, v in raw.get("processed_emails", {}).items()
         },
@@ -75,7 +77,6 @@ def save(state: SyncState, path: Path) -> None:
         json.dumps(
             {
                 "version": state.version,
-                "topics_version": state.topics_version,
                 "chats": {k: asdict(v) for k, v in state.chats.items()},
                 "processed_emails": {
                     k: asdict(v) for k, v in state.processed_emails.items()

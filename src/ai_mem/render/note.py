@@ -179,7 +179,6 @@ def render(
 
     fm_block = frontmatter.to_yaml_block(chat, imported_at)
     info = _info_callout(chat, imported_at)
-    summary_body = chat.summary or "_(pending)_"
     sources = _sources_section(chat)
     conversation = transcript.render(chat)
 
@@ -187,8 +186,6 @@ def render(
         fm_block.rstrip("\n"),
         f"# {chat.title}",
         info,
-        "## Summary",
-        summary_body,
         sources,
         conversation,
     ]
@@ -198,7 +195,7 @@ def render(
     # Build attachment stubs
     stubs: list[RenderedAttachmentStub] = []
     for att in chat.attachments:
-        if att.extracted_content is None:
+        if not att.extracted_content:
             continue
         # Stub note lives at same vault_rel_path but with .md extension
         stub_path = att.vault_rel_path.with_suffix(".md")

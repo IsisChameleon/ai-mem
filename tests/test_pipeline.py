@@ -30,7 +30,6 @@ def _make_config(tmp_path: Path) -> Config:
             raw_archive=tmp_path / "raw",
             failed=tmp_path / "failed",
             sync_state=tmp_path / "sync-state.json",
-            topics=tmp_path / "topics.yaml",
         ),
         attachments=Attachments(),
         gmail=Gmail(
@@ -101,7 +100,6 @@ def test_simple_end_to_end(tmp_path):
     assert key in chats
     entry = chats[key]
     assert entry["content_hash"]
-    assert entry["summary_hash"] == ""  # populated by enrich stage in Task D
     assert entry["note_path"]
 
 

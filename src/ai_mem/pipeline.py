@@ -32,10 +32,10 @@ class IngestResult:
     notes_paths: list[Path] = field(default_factory=list)
 
 
-def _detect_platform_and_parse(export_dir: Path):
+def _detect_platform_and_parse(export_dir: Path, cfg: Config):
     """Detect the platform from export_dir and return an iterator of NormalizedChat."""
     if (export_dir / "conversations.json").exists():
-        return ClaudeParser().parse(export_dir)
+        return ClaudeParser(account=cfg.account).parse(export_dir)
     raise ValueError(
         f"Cannot detect platform from export dir {export_dir!r}. "
         "Only Claude exports (containing conversations.json) are currently supported. "
@@ -108,7 +108,7 @@ def _run_ingest(
     """Core ingest logic after extraction is resolved."""
     state = load(cfg.paths.sync_state)
 
-    chat_iter = _detect_platform_and_parse(export_dir)
+    chat_iter = _detect_platform_and_parse(export_dir, cfg)
 
     for chat in chat_iter:
         result.chats_seen += 1
@@ -188,12 +188,10 @@ def _process_chat(
     # Update state.
     state.chats[key] = ChatStateEntry(
         content_hash=content_hash,
-        summary_hash="",  # populated by enrich stage in Task D
         note_path=rendered.vault_rel_path.as_posix(),
         updated_at=chat.updated_at.isoformat(),
         rendered_at=datetime.now(UTC).isoformat(),
         attachment_ids=[a.id for a in chat.attachments],
-        summary_pending=True,
     )
 
     result.chats_written += 1

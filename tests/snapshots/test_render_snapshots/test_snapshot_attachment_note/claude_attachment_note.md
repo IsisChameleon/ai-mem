@@ -3,13 +3,12 @@ id: 1e2e978f-53b7-4fe4-a7fc-39cfa11e1776
 title: Fixture — attachment with extracted content
 platform: claude
 model: null
+account: null
 url: https://claude.ai/chat/1e2e978f-53b7-4fe4-a7fc-39cfa11e1776
 created: '2024-07-15T10:16:40Z'
 updated: '2024-07-15T10:16:53Z'
 imported: '2026-01-15T12:00:00Z'
 message_count: 2
-topics: []
-summary: ''
 status: active
 has_alternate_branches: false
 branch_count: 1
@@ -18,10 +17,6 @@ branch_count: 1
 # Fixture — attachment with extracted content
 
 > [!info] **Claude** · unknown model · 2024-07-15 · 2 messages · imported 2026-01-15
-
-## Summary
-
-_(pending)_
 
 ## Sources & artifacts
 

@@ -58,7 +58,6 @@ def test_markdown_structure_simple(tmp_path):
     rn = note.render(chat, imported_at=FIXED_IMPORT)
     md = rn.markdown
     assert f"# {chat.title}" in md
-    assert "## Summary" in md
     assert "## Sources & artifacts" in md
     assert "## Conversation" in md
     assert md.startswith("---\n")
@@ -69,7 +68,6 @@ def test_markdown_structure_attachment(tmp_path):
     rn = note.render(chat, imported_at=FIXED_IMPORT)
     md = rn.markdown
     assert f"# {chat.title}" in md
-    assert "## Summary" in md
     assert "## Sources & artifacts" in md
     assert "## Conversation" in md
     assert md.startswith("---\n")
@@ -80,7 +78,6 @@ def test_markdown_structure_tool_citations(tmp_path):
     rn = note.render(chat, imported_at=FIXED_IMPORT)
     md = rn.markdown
     assert f"# {chat.title}" in md
-    assert "## Summary" in md
     assert "## Sources & artifacts" in md
     assert "## Conversation" in md
     assert md.startswith("---\n")

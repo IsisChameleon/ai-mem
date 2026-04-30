@@ -5,7 +5,6 @@ from ai_mem.schema import (
     ContentBlock,
     NormalizedChat,
     NormalizedMessage,
-    SummaryResult,
 )
 
 
@@ -51,10 +50,6 @@ def test_attachment_requires_sha_and_relpath() -> None:
     )
     assert a.kind == "user_upload"
 
-
-def test_summary_result_defaults() -> None:
-    r = SummaryResult(summary="one", topics=["a"])
-    assert r.status_hint == "active"
 
 
 def test_extra_fields_allowed_for_forward_compat() -> None:

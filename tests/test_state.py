@@ -22,11 +22,9 @@ def test_roundtrip_empty(tmp_path: Path) -> None:
 def test_roundtrip_with_entries(tmp_path: Path) -> None:
     p = tmp_path / ".sync-state.json"
     state = SyncState(
-        topics_version="abc",
         chats={
             chat_key("claude", "c1"): ChatStateEntry(
                 content_hash="h1",
-                summary_hash="s1",
                 note_path="AI Chats/claude/2025-11/a.md",
                 updated_at="2025-11-07T00:00:00Z",
                 rendered_at="2025-11-07T00:00:01Z",
@@ -43,7 +41,6 @@ def test_roundtrip_with_entries(tmp_path: Path) -> None:
     )
     save(state, p)
     loaded = load(p)
-    assert loaded.topics_version == "abc"
     assert loaded.chats["claude:c1"].content_hash == "h1"
     assert loaded.chats["claude:c1"].attachment_ids == ["aaa", "bbb"]
     assert loaded.processed_emails["msg1"].platform == "claude"
